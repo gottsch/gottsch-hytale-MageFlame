@@ -33,5 +33,6 @@ public class MageFlameCommand extends AbstractCommandCollection {
         // allow anyone to run command
         this.setPermissionGroup(GameMode.Adventure);
         this.addSubCommand(new HealthCheckCommand(mageFlame.getName(), mageFlame.getManifest().getVersion().toString()));
+        this.addSubCommand(new LightTestCommand());
     }
 }

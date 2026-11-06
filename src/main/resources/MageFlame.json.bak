@@ -1,0 +1,5 @@
+{
+  "EnableLifespanDisplay": true,
+  "MaxSummonedEntitiesPerPlayer": 1,
+  "MageFlameLifespanSeconds": 600
+}
