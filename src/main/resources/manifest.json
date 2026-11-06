@@ -1,0 +1,25 @@
+{
+    "Group": "gottsch",
+    "Name": "MageFlame",
+    "Version": "0.1.0",
+    "Description": "Hands-free light sources that follow you wherever you go, summoned with scrolls. No mana, no classes, no levels.",
+    "Authors": [
+        {
+            "Name": "gottsch"
+        }
+    ],
+    "Website": "https://github.com/gottsch",
+    "DisabledByDefault": false,
+    "IncludesAssetPack": true,
+    "Dependencies": {
+        "Hytale:AssetModule": "*"
+    },
+    "OptionalDependencies": {
+        
+    },
+    "ServerVersion": ">=0.7.4 <0.8.0",
+    "Main": "mod.gottsch.hytale.mageflame.MageFlame",
+    "UpdateChecker": {
+        "CurseForge": ""
+    }
+}
