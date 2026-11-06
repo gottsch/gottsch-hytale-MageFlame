@@ -41,6 +41,10 @@ public class MageFlameConfig {
                     (config, value, extraInfo) -> config.mageFlameLifespanSeconds = value,
                     (config, extraInfo) -> config.mageFlameLifespanSeconds)
             .add()
+            .append(new KeyedCodec<>("DespawnOnOwnerDeath", Codec.BOOLEAN),
+                    (config, value, extraInfo) -> config.despawnOnOwnerDeath = value,
+                    (config, extraInfo) -> config.despawnOnOwnerDeath)
+            .add()
             .build();
 
     // show the remaining lifespan of summoned light sources on the HUD
@@ -49,8 +53,14 @@ public class MageFlameConfig {
     private int maxSummonedEntitiesPerPlayer = 1;
     // lifespan of a Mage Flame in seconds (10 minutes, same as the Minecraft versions' 12000 ticks)
     private int mageFlameLifespanSeconds = 600;
+    // remove a player's flames when that player dies (false: the flames stay with them through respawn)
+    private boolean despawnOnOwnerDeath = false;
 
     private MageFlameConfig() {
+    }
+
+    public boolean isDespawnOnOwnerDeath() {
+        return despawnOnOwnerDeath;
     }
 
     public boolean isEnableLifespanDisplay() {

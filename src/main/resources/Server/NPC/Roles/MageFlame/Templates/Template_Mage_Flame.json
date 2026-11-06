@@ -1,0 +1,153 @@
+{
+  "Type": "Abstract",
+  "$Comment": "Base for the Mage Flame slot roles (Mage_Flame_1..4). Structure copied from the vanilla Server/NPC/Roles/_Core/Tests/Test_Pet_Lantern.json: hovering walker that joins the nearest player's flock and seeks them, with a DespawnTimer lifespan and interact-to-dismiss. Each slot role only sets where this flame floats (distance + height), so several flames do not fight over one spot. ApplySeparation is false: the slots do the spacing, and separation made flames drift in front of the player's face.",
+  "StartState": "Idle",
+  "DefaultSubState": "Default",
+  "Appearance": "Mage_Flame",
+  "Invulnerable": true,
+  "FlockAllowedNPC": [ "Mage_Flame_1", "Mage_Flame_2", "Mage_Flame_3", "Mage_Flame_4" ],
+  "ApplySeparation": false,
+  "MaxHealth": 50,
+  "NameTranslationKey": "server.npcRoles.Mage_Flame.name",
+  "Parameters": {
+    "DespawnTimer": {
+      "Value": 120,
+      "Description": "How long the flame lasts before it despawns, in seconds. (120 for testing; the real default is 600.)"
+    },
+    "FollowStopDistance": {
+      "Value": 3,
+      "Description": "How far from the player this flame settles."
+    },
+    "FollowSlowDownDistance": {
+      "Value": 5,
+      "Description": "Distance from the player at which this flame starts to slow down."
+    },
+    "CatchUpTeleportDistance": {
+      "Value": 8,
+      "Description": "If no player is within this many blocks, the flame teleports next to its leader. Keep it short underground, where a flame left behind in a tunnel is no use."
+    },
+    "HoverMin": {
+      "Value": 2.2,
+      "Description": "Lowest height this flame floats above the ground."
+    },
+    "HoverMax": {
+      "Value": 3,
+      "Description": "Highest height this flame floats above the ground."
+    }
+  },
+  "MotionControllerList": [
+    {
+      "$Comment": "Fly, not Walk: a flame has no legs. MinAirSpeed 0 lets it hover still instead of keeping moving like a bird. Height bounds come from the slot's HoverMin / HoverMax.",
+      "Type": "Fly",
+      "Acceleration": 10,
+      "Deceleration": 8,
+      "AutoLevel": true,
+      "DesiredAltitudeWeight": 1,
+      "MaxClimbAngle": 90,
+      "MaxClimbSpeed": 30,
+      "MaxHeightOverGround": { "Compute": "HoverMax" },
+      "MaxHorizontalSpeed": 15,
+      "MaxRollAngle": 1,
+      "MaxSinkAngle": 90,
+      "MaxSinkSpeed": 3,
+      "MaxTurnSpeed": 300,
+      "MinAirSpeed": 0,
+      "MinHeightOverGround": { "Compute": "HoverMin" }
+    }
+  ],
+  "Instructions": [
+    {
+      "Instructions": [
+        {
+          "$Comment": "Start the lifespan timer once.",
+          "Continue": true,
+          "Sensor": { "Type": "Any", "Once": true },
+          "Actions": [
+            {
+              "Type": "TimerStart",
+              "Name": "DespawnTimer",
+              "StartValueRange": { "Compute": "makeRange(DespawnTimer)" },
+              "RestartValueRange": { "Compute": "makeRange(DespawnTimer)" }
+            }
+          ]
+        },
+        {
+          "$Comment": "Lifespan over: vanish.",
+          "Continue": true,
+          "Sensor": { "Type": "Timer", "Name": "DespawnTimer", "State": "Stopped" },
+          "Actions": [ { "Type": "Despawn" } ]
+        },
+        {
+          "Sensor": { "Type": "State", "State": "Idle" },
+          "Instructions": [
+            {
+              "Sensor": { "Type": "State", "State": ".Default" },
+              "Instructions": [
+                {
+                  "$Comment": "Not in a flock yet: join the nearest player's flock so that player becomes the leader.",
+                  "Continue": true,
+                  "Sensor": {
+                    "Type": "Self",
+                    "Filters": [ { "Type": "Flock", "FlockStatus": "NotMember" } ]
+                  },
+                  "Instructions": [
+                    {
+                      "Sensor": { "Type": "Player", "Range": 20 },
+                      "Actions": [ { "Type": "JoinFlock", "ForceJoin": true } ]
+                    }
+                  ]
+                },
+                {
+                  "$Comment": "Left behind (stuck in a low passage, or the player ran off): jump next to the leader. Same idea as the vanilla Test_Pet_Lantern.",
+                  "Sensor": {
+                    "Type": "And",
+                    "Sensors": [
+                      { "Type": "FlockLeader" },
+                      { "Type": "Not", "Sensor": { "Type": "Player", "Range": { "Compute": "CatchUpTeleportDistance" } } }
+                    ]
+                  },
+                  "BodyMotion": {
+                    "Type": "Teleport",
+                    "OffsetRange": [ 2, 3 ],
+                    "MaxYOffset": 2
+                  }
+                },
+                {
+                  "$Comment": "Follow the flock leader (the summoner) to this slot's distance.",
+                  "Sensor": {
+                    "Type": "And",
+                    "Sensors": [
+                      { "Type": "FlockLeader" },
+                      { "Type": "Self", "Filters": [ { "Type": "Flock", "FlockStatus": "Follower" } ] }
+                    ]
+                  },
+                  "HeadMotion": { "Type": "Watch" },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": { "Compute": "FollowSlowDownDistance" },
+                    "StopDistance": { "Compute": "FollowStopDistance" },
+                    "RelativeSpeed": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "InteractionInstruction": {
+    "$Comment": "Interacting with the flame dismisses it.",
+    "Instructions": [
+      {
+        "Continue": true,
+        "Sensor": { "Type": "Any" },
+        "Actions": [ { "Type": "SetInteractable", "Interactable": true } ]
+      },
+      {
+        "Sensor": { "Type": "HasInteracted" },
+        "Actions": [ { "Type": "Despawn" } ]
+      }
+    ]
+  }
+}

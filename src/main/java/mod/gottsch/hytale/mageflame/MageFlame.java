@@ -23,6 +23,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
 import mod.gottsch.hytale.mageflame.core.command.MageFlameCommand;
 import mod.gottsch.hytale.mageflame.core.config.MageFlameConfig;
+import mod.gottsch.hytale.mageflame.core.summon.OwnerDeathSystem;
 
 import javax.annotation.Nonnull;
 
@@ -49,6 +50,8 @@ public class MageFlame extends JavaPlugin {
         config.save();
         // commands
         this.getCommandRegistry().registerCommand(new MageFlameCommand(this));
+        // systems
+        this.getEntityStoreRegistry().registerSystem(new OwnerDeathSystem());
     }
 
     public static Config<MageFlameConfig> getConfig() {

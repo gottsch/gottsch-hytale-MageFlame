@@ -1,0 +1,10 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Mage_Flame",
+  "Modify": {
+    "FollowStopDistance": 4.5,
+    "FollowSlowDownDistance": 6.5,
+    "HoverMin": 1.2,
+    "HoverMax": 1.7
+  }
+}

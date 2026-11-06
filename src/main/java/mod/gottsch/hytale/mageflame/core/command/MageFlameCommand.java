@@ -34,5 +34,8 @@ public class MageFlameCommand extends AbstractCommandCollection {
         this.setPermissionGroup(GameMode.Adventure);
         this.addSubCommand(new HealthCheckCommand(mageFlame.getName(), mageFlame.getManifest().getVersion().toString()));
         this.addSubCommand(new LightTestCommand());
+        this.addSubCommand(new SummonCommand());
+        this.addSubCommand(new DispelCommand());
+        this.addSubCommand(new StatusCommand());
     }
 }
