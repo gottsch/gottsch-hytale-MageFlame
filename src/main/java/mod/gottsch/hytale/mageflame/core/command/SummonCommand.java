@@ -22,6 +22,8 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.DefaultArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -31,21 +33,25 @@ import mod.gottsch.hytale.mageflame.core.summon.FlameSummoner;
 import javax.annotation.Nonnull;
 
 /**
- * /mageflame summon - conjures a Mage Flame next to the player, in the lowest free slot. A testing and admin shortcut for
- * what the scroll item does; both go through {@link FlameSummoner}.
+ * /mageflame summon [--type=Mage_Flame] - conjures a flame next to the player, in the lowest free slot. A testing and admin
+ * shortcut for what the scroll items do; both go through {@link FlameSummoner}.
  *
  * @author Mark Gottschling on 11/06/2026
  */
 public class SummonCommand extends AbstractPlayerCommand {
+    private final DefaultArg<String> typeArg;
 
     public SummonCommand() {
-        super("summon", "Conjure a Mage Flame that follows you (what the scroll does).");
+        super("summon", "Conjure a flame that follows you (what the scroll does).");
         this.setPermissionGroup(GameMode.Adventure);
+        this.typeArg = withDefaultArg("type", "Flame type: the part of its slot role ids before _Slot<N>",
+                ArgTypes.STRING, FlameSummoner.DEFAULT_FLAME_TYPE, FlameSummoner.DEFAULT_FLAME_TYPE);
     }
 
     @Override
     protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
                            @Nonnull Ref<EntityStore> ref, @Nonnull PlayerRef playerRef, @Nonnull World world) {
-        context.sendMessage(Message.raw(FlameSummoner.summon(store, ref, playerRef, world).message()));
+        String type = typeArg.get(context);
+        context.sendMessage(Message.raw(FlameSummoner.summon(store, ref, playerRef, world, type).message()));
     }
 }

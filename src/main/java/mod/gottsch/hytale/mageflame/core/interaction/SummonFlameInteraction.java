@@ -17,6 +17,8 @@
  */
 package mod.gottsch.hytale.mageflame.core.interaction;
 
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
@@ -32,8 +34,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import mod.gottsch.hytale.mageflame.core.summon.FlameSummoner;
 
 /**
- * Item interaction {@code MageFlameSummon}: conjures a Mage Flame for the player using the item. The scroll's JSON runs it
- * and then a vanilla {@code ModifyInventory} step to use up one scroll.
+ * Item interaction {@code MageFlameSummon}: conjures a flame for the player using the item. The item's JSON picks the flame with
+ * {@code "FlameType"} (the part of the slot role ids before {@code _Slot<N>}, default {@code Mage_Flame}), so a new flame type
+ * and its scroll need only JSON. The JSON runs this and then a vanilla {@code ModifyInventory} step to use up one scroll:
+ * <pre>
+ * { "Type": "MageFlameSummon", "FlameType": "Mage_Flame" }
+ * </pre>
  * <p>
  * The summon itself is deferred to the world thread ({@link World#execute}) because the interaction runs while the entity
  * store is being processed, where spawning entities directly is not allowed.
@@ -46,8 +52,15 @@ public class SummonFlameInteraction extends SimpleInstantInteraction {
 
     public static final BuilderCodec<SummonFlameInteraction> CODEC = BuilderCodec
             .builder(SummonFlameInteraction.class, SummonFlameInteraction::new, SimpleInstantInteraction.CODEC)
-            .documentation("Conjure a Mage Flame that follows the player using the item.")
+            .documentation("Conjure a flame that follows the player using the item.")
+            .append(new KeyedCodec<>("FlameType", Codec.STRING),
+                    (interaction, value, extraInfo) -> interaction.flameType = value,
+                    (interaction, extraInfo) -> interaction.flameType)
+            .documentation("Which flame: the part of its slot role ids before _Slot<N>, for example Mage_Flame.")
+            .add()
             .build();
+
+    private String flameType = FlameSummoner.DEFAULT_FLAME_TYPE;
 
     public SummonFlameInteraction() {
         super();
@@ -66,8 +79,9 @@ public class SummonFlameInteraction extends SimpleInstantInteraction {
         }
         Store<EntityStore> store = commandBuffer.getStore();
         World world = store.getExternalData().getWorld();
+        final String flame = flameType;
         world.execute(() -> {
-            FlameSummoner.Result result = FlameSummoner.summon(store, ref, playerRef, world);
+            FlameSummoner.Result result = FlameSummoner.summon(store, ref, playerRef, world, flame);
             playerRef.sendMessage(Message.raw(result.message()));
         });
     }

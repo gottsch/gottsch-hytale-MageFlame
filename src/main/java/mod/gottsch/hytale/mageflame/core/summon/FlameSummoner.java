@@ -32,13 +32,18 @@ import org.joml.Vector3d;
 import java.util.List;
 
 /**
- * Conjures a Mage Flame for a player: picks the lowest free slot, replaces the player's oldest flame if they are at the
- * limit, spawns the slot's NPC role above them and tracks it. Shared by {@code /mageflame summon} and the scroll item so
- * both behave identically. Must run on the world thread.
+ * Conjures a flame of a given type for a player: picks the lowest free slot, replaces the player's oldest flame if they are at the
+ * limit, spawns the type's slot role ({@code <FlameType>_Slot<N>}) above them and tracks it. Shared by {@code /mageflame summon}
+ * and the scroll items so both behave identically. Must run on the world thread.
+ * <p>
+ * A flame type is only a name: it needs {@link SummonTracker#SLOT_COUNT} slot roles in the asset pack and nothing in Java.
+ * Types share the player's limit and slots.
  *
  * @author Mark Gottschling on 11/06/2026
  */
 public final class FlameSummoner {
+    /** The flame type used when none is given. */
+    public static final String DEFAULT_FLAME_TYPE = "Mage_Flame";
 
     /** What happened, and the message to show the player. */
     public record Result(boolean success, String message) {
@@ -47,10 +52,14 @@ public final class FlameSummoner {
     private FlameSummoner() {
     }
 
-    public static Result summon(Store<EntityStore> store, Ref<EntityStore> playerEntity, PlayerRef playerRef, World world) {
+    public static Result summon(Store<EntityStore> store, Ref<EntityStore> playerEntity, PlayerRef playerRef, World world,
+                                String flameType) {
         TransformComponent transform = store.getComponent(playerEntity, TransformComponent.getComponentType());
         if (transform == null) {
             return new Result(false, "Could not find your position.");
+        }
+        if (flameType == null || flameType.isBlank()) {
+            flameType = DEFAULT_FLAME_TYPE;
         }
 
         // enforce the per-player limit (never more than there are slot roles): summoning past it replaces the oldest flame
@@ -67,7 +76,7 @@ public final class FlameSummoner {
 
         // each flame takes the lowest free slot; the slot's role decides where it floats beside the player
         int slot = SummonTracker.freeSlot(mine);
-        String role = SummonTracker.roleFor(slot);
+        String role = SummonTracker.roleFor(flameType, slot);
 
         // just above the player's head height
         Vector3d spawnPos = new Vector3d(transform.getPosition()).add(0, 2, 0);
@@ -75,8 +84,8 @@ public final class FlameSummoner {
         if (spawned == null) {
             return new Result(false, "Could not spawn " + role + " (is the role loaded?).");
         }
-        mine.add(new SummonTracker.Flame(slot, spawned.left(), world, System.currentTimeMillis(), playerRef,
+        mine.add(new SummonTracker.Flame(slot, flameType, spawned.left(), world, System.currentTimeMillis(), playerRef,
                 new SummonTracker.Watch()));
-        return new Result(true, replaced ? "Your Mage Flame is renewed." : "A Mage Flame appears.");
+        return new Result(true, replaced ? "Your flame is renewed." : "A flame appears.");
     }
 }

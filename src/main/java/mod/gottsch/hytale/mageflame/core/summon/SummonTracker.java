@@ -34,11 +34,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 
 /**
  * Remembers which summoned flames belong to which player, which "slot" each one holds, and when it was summoned.
  * <p>
- * A slot is a place beside the player: every slot has its own NPC role ({@code Mage_Flame_1}..{@code _4}) that floats
+ * A slot is a place beside the player: every flame type has one NPC role per slot ({@code <Type>_Slot1}..{@code _Slot4}) that floats
  * at a different distance and height, so several flames settle in different spots instead of fighting over one.
  * <p>
  * The plugin, not the NPC role, owns the lifespan: {@link #expire(int)} runs about once a second on a timer thread and
@@ -50,12 +51,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Mark Gottschling on 11/06/2026
  */
 public final class SummonTracker {
-    /** Number of slot roles that exist in Server/NPC/Roles/MageFlame (Mage_Flame_1 .. Mage_Flame_N). */
+    /** Number of slots. Every flame type must provide this many slot roles: {@code <Type>_Slot1} .. {@code <Type>_Slot<N>}. */
     public static final int SLOT_COUNT = 4;
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-    private static final String ROLE_PREFIX = "Mage_Flame_";
+    /** A slot role id is {@code <FlameType>_Slot<N>}, for example {@code Mage_Flame_Slot2}. */
+    private static final String SLOT_INFIX = "_Slot";
+    private static final Pattern SLOT_ROLE = Pattern.compile("^.+_Slot[1-9][0-9]*$");
 
     // lists are copy-on-write: commands change them on a world thread while the expiry timer reads and prunes them
     private static final Map<UUID, List<Flame>> FLAMES = new ConcurrentHashMap<>();
@@ -64,11 +67,13 @@ public final class SummonTracker {
      * A tracked flame.
      *
      * @param slot            the slot it holds (1-based)
+     * @param type            the flame type (the part of its role id before {@code _Slot<N>}), for example {@code Mage_Flame}
      * @param ref             its entity
      * @param world           the world it lives in, needed to remove it on that world's thread
      * @param spawnedAtMillis when it was summoned ({@link System#currentTimeMillis()})
      */
-    public record Flame(int slot, Ref<EntityStore> ref, World world, long spawnedAtMillis, PlayerRef owner, Watch watch) {
+    public record Flame(int slot, String type, Ref<EntityStore> ref, World world, long spawnedAtMillis, PlayerRef owner,
+                        Watch watch) {
     }
 
     /** What the stuck watchdog remembers about a flame between checks. Only touched on the flame's world thread. */
@@ -78,8 +83,8 @@ public final class SummonTracker {
     }
 
     /**
-     * How far from its owner each slot's flame normally settles (slot 1 first). Keep in step with FollowStopDistance in
-     * Server/NPC/Roles/MageFlame/Mage_Flame_N.json.
+     * How far from its owner each slot's flame normally settles (slot 1 first). Keep in step with FollowStopDistance in every
+     * flame type's slot roles (Server/NPC/Roles/MageFlame/Mage_Flame_SlotN.json): all types share the same slot distances.
      */
     private static final double[] SLOT_STOP_DISTANCE = {3.0, 4.5, 6.0, 7.5};
     /** A flame this much farther than its slot distance, and not moving, counts as pinned. */
@@ -110,14 +115,17 @@ public final class SummonTracker {
         return -1;
     }
 
-    /** The NPC role id for a slot, for example slot 2 -> {@code Mage_Flame_2}. */
-    public static String roleFor(int slot) {
-        return ROLE_PREFIX + slot;
+    /** The NPC role id for a flame type and slot, for example {@code Mage_Flame}, slot 2 -> {@code Mage_Flame_Slot2}. */
+    public static String roleFor(String flameType, int slot) {
+        return flameType + SLOT_INFIX + slot;
     }
 
-    /** True for any of the slot roles. */
+    /**
+     * True for the slot role of ANY flame type ({@code <Type>_Slot<N>}), so flames are recognised without the Java knowing the
+     * types, including ones left in the world from before a restart.
+     */
     public static boolean isFlameRole(String roleName) {
-        return roleName != null && roleName.startsWith(ROLE_PREFIX);
+        return roleName != null && SLOT_ROLE.matcher(roleName).matches();
     }
 
     /** Whole seconds a flame has left, never below zero. */

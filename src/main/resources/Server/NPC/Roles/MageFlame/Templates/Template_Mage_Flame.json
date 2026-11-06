@@ -1,15 +1,15 @@
 {
   "Type": "Abstract",
-  "$Comment": "Base for the Mage Flame slot roles (Mage_Flame_1..4). Structure copied from the vanilla Server/NPC/Roles/_Core/Tests/Test_Pet_Lantern.json: hovering walker that joins the nearest player's flock and seeks them, with a DespawnTimer lifespan and interact-to-dismiss. Each slot role only sets where this flame floats (distance + height), so several flames do not fight over one spot. ApplySeparation is false: the slots do the spacing, and separation made flames drift in front of the player's face.",
+  "$Comment": "Base for the Mage Flame slot roles (Mage_Flame_Slot1..4). Structure copied from the vanilla Server/NPC/Roles/_Core/Tests/Test_Pet_Lantern.json: hovering walker that joins the nearest player's flock and seeks them, with a DespawnTimer lifespan and interact-to-dismiss. Each slot role only sets where this flame floats (distance + height), so several flames do not fight over one spot. ApplySeparation is false: the slots do the spacing, and separation made flames drift in front of the player's face.",
   "StartState": "Idle",
   "DefaultSubState": "Default",
   "Appearance": "Mage_Flame",
   "Invulnerable": true,
   "FlockAllowedNPC": [
-    "Mage_Flame_1",
-    "Mage_Flame_2",
-    "Mage_Flame_3",
-    "Mage_Flame_4"
+    "Mage_Flame_Slot1",
+    "Mage_Flame_Slot2",
+    "Mage_Flame_Slot3",
+    "Mage_Flame_Slot4"
   ],
   "ApplySeparation": false,
   "MaxHealth": 50,

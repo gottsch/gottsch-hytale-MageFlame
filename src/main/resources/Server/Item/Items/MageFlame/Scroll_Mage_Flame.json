@@ -71,7 +71,8 @@
           "Type": "Serial",
           "Interactions": [
             {
-              "Type": "MageFlameSummon"
+              "Type": "MageFlameSummon",
+              "FlameType": "Mage_Flame"
             },
             {
               "Type": "ModifyInventory",

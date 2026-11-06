@@ -1,6 +1,6 @@
 {
   "EnableLifespanDisplay": true,
   "MaxSummonedEntitiesPerPlayer": 3,
-  "MageFlameLifespanSeconds": 120,
+  "MageFlameLifespanSeconds": 600,
   "DespawnOnOwnerDeath": false
 }
