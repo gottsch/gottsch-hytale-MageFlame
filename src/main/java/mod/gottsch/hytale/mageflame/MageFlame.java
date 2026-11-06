@@ -18,14 +18,18 @@
 package mod.gottsch.hytale.mageflame;
 
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
 import mod.gottsch.hytale.mageflame.core.command.MageFlameCommand;
 import mod.gottsch.hytale.mageflame.core.config.MageFlameConfig;
 import mod.gottsch.hytale.mageflame.core.summon.OwnerDeathSystem;
+import mod.gottsch.hytale.mageflame.core.summon.SummonTracker;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Mage Flame plugin entry point.
@@ -52,6 +56,18 @@ public class MageFlame extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new MageFlameCommand(this));
         // systems
         this.getEntityStoreRegistry().registerSystem(new OwnerDeathSystem());
+        // the plugin owns the flames' lifespan: once a second, remove the ones that have outlived the configured time
+        @SuppressWarnings("unchecked")
+        ScheduledFuture<Void> expiryTask = (ScheduledFuture<Void>) HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+            try {
+                SummonTracker.expire(Math.max(1, config.get().getMageFlameLifespanSeconds()));
+                SummonTracker.watchdog();
+            } catch (Exception e) {
+                // an exception would silently stop the schedule, so log it and keep ticking
+                LOGGER.atWarning().withCause(e).log("Mage Flame expiry check failed");
+            }
+        }, 1, 1, TimeUnit.SECONDS);
+        this.getTaskRegistry().registerTask(expiryTask);
     }
 
     public static Config<MageFlameConfig> getConfig() {

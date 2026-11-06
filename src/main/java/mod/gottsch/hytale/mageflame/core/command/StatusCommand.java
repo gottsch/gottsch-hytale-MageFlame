@@ -69,7 +69,8 @@ public class StatusCommand extends AbstractPlayerCommand {
                 }
                 TransformComponent t = chunk.getComponent(i, TransformComponent.getComponentType());
                 String distance = t == null ? "?" : String.format("%.1f", t.getPosition().distance(me.getPosition()));
-                lines.add(npc.getRoleName() + ": " + distance + " blocks away, "
+                String above = t == null ? "?" : String.format("%+.1f", t.getPosition().y - me.getPosition().y);
+                lines.add(npc.getRoleName() + ": " + distance + " blocks away (" + above + " vertically), "
                         + describe(chunk.getComponent(i, FlockMembership.getComponentType())));
             }
         });

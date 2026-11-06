@@ -4,7 +4,15 @@
   "Modify": {
     "FollowStopDistance": 7.5,
     "FollowSlowDownDistance": 9.5,
-    "HoverMin": 1.2,
-    "HoverMax": 1.7
+    "IndoorFollowOffset": [
+      0,
+      1.5,
+      0
+    ],
+    "OutdoorFollowOffset": [
+      0,
+      3.2,
+      0
+    ]
   }
 }

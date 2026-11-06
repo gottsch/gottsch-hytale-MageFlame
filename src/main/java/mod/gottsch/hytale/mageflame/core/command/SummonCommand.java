@@ -65,7 +65,7 @@ public class SummonCommand extends AbstractPlayerCommand {
         List<SummonTracker.Flame> mine = SummonTracker.flamesOf(playerRef.getUuid());
         boolean replaced = false;
         while (mine.size() >= max) {
-            SummonTracker.Flame oldest = mine.removeFirst();
+            SummonTracker.Flame oldest = mine.remove(0);
             if (oldest.ref().isValid()) {
                 store.removeEntity(oldest.ref(), RemoveReason.REMOVE);
             }
@@ -83,7 +83,8 @@ public class SummonCommand extends AbstractPlayerCommand {
             context.sendMessage(Message.raw("Could not spawn " + role + " (is the role loaded?)."));
             return;
         }
-        mine.add(new SummonTracker.Flame(slot, spawned.left()));
+        mine.add(new SummonTracker.Flame(slot, spawned.left(), world, System.currentTimeMillis(), playerRef,
+                new SummonTracker.Watch()));
         context.sendMessage(Message.raw(replaced ? "Your Mage Flame is renewed." : "A Mage Flame appears."));
     }
 }
