@@ -19,11 +19,13 @@ package mod.gottsch.hytale.mageflame;
 
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
 import mod.gottsch.hytale.mageflame.core.command.MageFlameCommand;
 import mod.gottsch.hytale.mageflame.core.config.MageFlameConfig;
+import mod.gottsch.hytale.mageflame.core.interaction.SummonFlameInteraction;
 import mod.gottsch.hytale.mageflame.core.summon.OwnerDeathSystem;
 import mod.gottsch.hytale.mageflame.core.summon.SummonTracker;
 
@@ -54,6 +56,9 @@ public class MageFlame extends JavaPlugin {
         config.save();
         // commands
         this.getCommandRegistry().registerCommand(new MageFlameCommand(this));
+        // item interactions usable from asset JSON, e.g. the scroll's "Type": "MageFlameSummon"
+        this.getCodecRegistry(Interaction.CODEC).register(SummonFlameInteraction.TYPE_NAME,
+                SummonFlameInteraction.class, SummonFlameInteraction.CODEC);
         // systems
         this.getEntityStoreRegistry().registerSystem(new OwnerDeathSystem());
         // the plugin owns the flames' lifespan: once a second, remove the ones that have outlived the configured time

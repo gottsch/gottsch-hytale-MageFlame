@@ -1,1 +1,3 @@
 npcRoles.Mage_Flame.name = Mage Flame
+items.Scroll_Mage_Flame.name = Scroll of Mage Flame
+items.Scroll_Mage_Flame.description = Right-click to read. Conjures a floating flame that follows you and lights your way.

@@ -1,0 +1,85 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Scroll_Mage_Flame.name",
+    "Description": "server.items.Scroll_Mage_Flame.description"
+  },
+  "$Comment": "Right-click to read: conjures a Mage Flame (our custom MageFlameSummon interaction, registered in MageFlame.setup) and uses up one scroll. Held model is the vanilla Items/Consumables/Scrolls/Scroll (icon from Deco_Scroll); recipe setup from Furniture_Crude_Torch; use-and-consume pattern from Weapon_Spellbook_Rekindle_Embers.",
+  "Categories": [
+    "Furniture.Lighting"
+  ],
+  "Quality": "Uncommon",
+  "MaxStack": 16,
+  "Model": "Items/Consumables/Scrolls/Scroll.blockymodel",
+  "Texture": "Items/MageFlame/Scroll_Mage_Flame_Texture.png",
+  "PlayerAnimationsId": "Item",
+  "Icon": "Icons/Items/MageFlame/Scroll_Mage_Flame.png",
+  "IconProperties": {
+    "Scale": 0.735,
+    "Translation": [
+      0,
+      -7.495
+    ],
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ]
+  },
+  "Recipe": {
+    "Input": [
+      {
+        "ItemId": "Ingredient_Fibre",
+        "Quantity": 2
+      },
+      {
+        "ItemId": "Ingredient_Tree_Sap",
+        "Quantity": 1
+      },
+      {
+        "ItemId": "Furniture_Crude_Torch",
+        "Quantity": 1
+      }
+    ],
+    "OutputQuantity": 1,
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "Categories": [
+          "Tools"
+        ],
+        "Id": "Fieldcraft"
+      },
+      {
+        "Id": "Workbench",
+        "Type": "Crafting",
+        "Categories": [
+          "Workbench_Survival"
+        ]
+      }
+    ]
+  },
+  "Tags": {
+    "Type": [
+      "Consumable"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Wood",
+  "Interactions": {
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "Serial",
+          "Interactions": [
+            {
+              "Type": "MageFlameSummon"
+            },
+            {
+              "Type": "ModifyInventory",
+              "AdjustHeldItemQuantity": -1
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

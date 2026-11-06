@@ -1,0 +1,74 @@
+/*
+ * This file is part of  Mage Flame.
+ * Copyright (c) 2026 Mark Gottschling (gottsch)
+ *
+ * Mage Flame is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Mage Flame is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Mage Flame.  If not, see <http://www.gnu.org/licenses/lgpl>.
+ */
+package mod.gottsch.hytale.mageflame.core.interaction;
+
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.InteractionType;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.InteractionContext;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import mod.gottsch.hytale.mageflame.core.summon.FlameSummoner;
+
+/**
+ * Item interaction {@code MageFlameSummon}: conjures a Mage Flame for the player using the item. The scroll's JSON runs it
+ * and then a vanilla {@code ModifyInventory} step to use up one scroll.
+ * <p>
+ * The summon itself is deferred to the world thread ({@link World#execute}) because the interaction runs while the entity
+ * store is being processed, where spawning entities directly is not allowed.
+ *
+ * @author Mark Gottschling on 11/06/2026
+ */
+public class SummonFlameInteraction extends SimpleInstantInteraction {
+    /** The type name used in item JSON: {@code "Type": "MageFlameSummon"}. */
+    public static final String TYPE_NAME = "MageFlameSummon";
+
+    public static final BuilderCodec<SummonFlameInteraction> CODEC = BuilderCodec
+            .builder(SummonFlameInteraction.class, SummonFlameInteraction::new, SimpleInstantInteraction.CODEC)
+            .documentation("Conjure a Mage Flame that follows the player using the item.")
+            .build();
+
+    public SummonFlameInteraction() {
+        super();
+    }
+
+    @Override
+    protected void firstRun(InteractionType type, InteractionContext context, CooldownHandler cooldownHandler) {
+        Ref<EntityStore> ref = context.getEntity();
+        CommandBuffer<EntityStore> commandBuffer = context.getCommandBuffer();
+        if (ref == null || commandBuffer == null) {
+            return;
+        }
+        PlayerRef playerRef = commandBuffer.getComponent(ref, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return;
+        }
+        Store<EntityStore> store = commandBuffer.getStore();
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            FlameSummoner.Result result = FlameSummoner.summon(store, ref, playerRef, world);
+            playerRef.sendMessage(Message.raw(result.message()));
+        });
+    }
+}

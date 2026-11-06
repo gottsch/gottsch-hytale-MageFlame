@@ -18,73 +18,34 @@
 package mod.gottsch.hytale.mageflame.core.command;
 
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.npc.NPCPlugin;
-import mod.gottsch.hytale.mageflame.MageFlame;
-import mod.gottsch.hytale.mageflame.core.summon.SummonTracker;
-import org.joml.Vector3d;
+import mod.gottsch.hytale.mageflame.core.summon.FlameSummoner;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 /**
- * /mageflame summon - conjures a Mage Flame next to the player, in the lowest free slot.
- * The slot's NPC role ({@code Mage_Flame_1}..) makes the nearest player its flock leader, so the flame follows
- * whoever summoned it, and decides where beside the player it floats.
+ * /mageflame summon - conjures a Mage Flame next to the player, in the lowest free slot. A testing and admin shortcut for
+ * what the scroll item does; both go through {@link FlameSummoner}.
  *
  * @author Mark Gottschling on 11/06/2026
  */
 public class SummonCommand extends AbstractPlayerCommand {
 
     public SummonCommand() {
-        super("summon", "Prototype: conjure a Mage Flame that follows you.");
+        super("summon", "Conjure a Mage Flame that follows you (what the scroll does).");
         this.setPermissionGroup(GameMode.Adventure);
     }
 
     @Override
     protected void execute(@Nonnull CommandContext context, @Nonnull Store<EntityStore> store,
                            @Nonnull Ref<EntityStore> ref, @Nonnull PlayerRef playerRef, @Nonnull World world) {
-        TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
-        if (transform == null) {
-            context.sendMessage(Message.raw("Could not find your position."));
-            return;
-        }
-
-        // enforce the per-player limit (never more than there are slot roles): summoning past it replaces the oldest flame
-        int max = Math.clamp(MageFlame.getConfig().get().getMaxSummonedEntitiesPerPlayer(), 1, SummonTracker.SLOT_COUNT);
-        List<SummonTracker.Flame> mine = SummonTracker.flamesOf(playerRef.getUuid());
-        boolean replaced = false;
-        while (mine.size() >= max) {
-            SummonTracker.Flame oldest = mine.remove(0);
-            if (oldest.ref().isValid()) {
-                store.removeEntity(oldest.ref(), RemoveReason.REMOVE);
-            }
-            replaced = true;
-        }
-
-        // each flame takes the lowest free slot; the slot's role decides where it floats beside the player
-        int slot = SummonTracker.freeSlot(mine);
-        String role = SummonTracker.roleFor(slot);
-
-        // just above the player's head height
-        Vector3d spawnPos = new Vector3d(transform.getPosition()).add(0, 2, 0);
-        var spawned = NPCPlugin.get().spawnNPC(store, role, null, spawnPos, Rotation3f.ZERO);
-        if (spawned == null) {
-            context.sendMessage(Message.raw("Could not spawn " + role + " (is the role loaded?)."));
-            return;
-        }
-        mine.add(new SummonTracker.Flame(slot, spawned.left(), world, System.currentTimeMillis(), playerRef,
-                new SummonTracker.Watch()));
-        context.sendMessage(Message.raw(replaced ? "Your Mage Flame is renewed." : "A Mage Flame appears."));
+        context.sendMessage(Message.raw(FlameSummoner.summon(store, ref, playerRef, world).message()));
     }
 }
