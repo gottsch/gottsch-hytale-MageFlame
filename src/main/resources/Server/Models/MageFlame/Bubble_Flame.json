@@ -1,0 +1,37 @@
+{
+  "Model": "Characters/Empty_Cube.blockymodel",
+  "Texture": "Characters/Empty_Cube_Texture.png",
+  "EyeHeight": 0.2,
+  "HitBox": {
+    "Max": {
+      "X": 0.25,
+      "Y": 0.3,
+      "Z": 0.25
+    },
+    "Min": {
+      "X": -0.25,
+      "Y": 0,
+      "Z": -0.25
+    }
+  },
+  "Light": {
+    "Color": "#da7",
+    "Radius": 8
+  },
+  "Particles": [
+    {
+      "SystemId": "Campfire_New_Cartoon",
+      "PositionOffset": {
+        "Y": 0.1
+      },
+      "Scale": 0.45
+    },
+    {
+      "SystemId": "Bubble_Flame_Shield",
+      "PositionOffset": {
+        "Y": 0.15
+      },
+      "Scale": 1.0
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Bubble_Flame_Circle"
+    },
+    {
+      "SpawnerId": "Bubble_Flame_Particles"
+    },
+    {
+      "SpawnerId": "Bubble_Flame_Spark",
+      "PositionOffset": {
+        "Y": -0.14
+      }
+    }
+  ]
+}

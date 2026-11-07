@@ -1,0 +1,110 @@
+{
+  "RenderMode": "Erosion",
+  "ParticleRotationInfluence": "Velocity",
+  "LinearFiltering": false,
+  "ParticleRotateWithSpawner": true,
+  "MaxConcurrentParticles": 15,
+  "ParticleLifeSpan": {
+    "Min": 1,
+    "Max": 1
+  },
+  "InitialVelocity": {
+    "Yaw": {
+      "Min": -15,
+      "Max": 15
+    },
+    "Pitch": {
+      "Min": 80,
+      "Max": 100
+    }
+  },
+  "Attractors": [
+    {
+      "RadialAcceleration": -1,
+      "RadialTangentAcceleration": 2,
+      "RadialAxis": {
+        "Y": 1
+      }
+    }
+  ],
+  "Particle": {
+    "Texture": "Particles/Textures/Fire/Fire_Small.png",
+    "ScaleRatioConstraint": "None",
+    "UVOption": "None",
+    "Animation": {
+      "0": {
+        "FrameIndex": {
+          "Min": 0,
+          "Max": 0
+        },
+        "Opacity": 0.0,
+        "Color": "#d2fffe",
+        "Rotation": {
+          "X": {
+            "Min": 0,
+            "Max": 0
+          },
+          "Y": {
+            "Min": 0,
+            "Max": 0
+          },
+          "Z": {
+            "Min": 0,
+            "Max": 0
+          }
+        }
+      },
+      "50": {
+        "Color": "#8efff2",
+        "Opacity": 0.45
+      },
+      "100": {
+        "Opacity": 0.0,
+        "Color": "#2bb8bb"
+      }
+    },
+    "InitialAnimationFrame": {
+      "Scale": {
+        "X": {
+          "Min": 0.07,
+          "Max": 0.07
+        },
+        "Y": {
+          "Min": 0.07,
+          "Max": 0.07
+        }
+      },
+      "Opacity": 1,
+      "Color": "#ffffff",
+      "Rotation": {
+        "Y": {
+          "Min": 90,
+          "Max": 90
+        },
+        "X": {
+          "Min": 45,
+          "Max": 45
+        }
+      }
+    }
+  },
+  "SpawnRate": {
+    "Min": 16.5,
+    "Max": 16.5
+  },
+  "EmitOffset": {
+    "X": {
+      "Max": 0.22400000000000003,
+      "Min": 0.22400000000000003
+    },
+    "Y": {
+      "Max": 0.22400000000000003,
+      "Min": 0.22400000000000003
+    },
+    "Z": {
+      "Max": 0.22400000000000003,
+      "Min": 0.22400000000000003
+    }
+  },
+  "VelocityStretchMultiplier": 1000
+}

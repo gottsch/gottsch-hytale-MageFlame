@@ -68,17 +68,8 @@
     "Secondary": {
       "Interactions": [
         {
-          "Type": "Serial",
-          "Interactions": [
-            {
-              "Type": "MageFlameSummon",
-              "FlameType": "Mage_Flame"
-            },
-            {
-              "Type": "ModifyInventory",
-              "AdjustHeldItemQuantity": -1
-            }
-          ]
+          "Type": "MageFlameSummon",
+          "FlameType": "Mage_Flame"
         }
       ]
     }

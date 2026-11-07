@@ -7,3 +7,6 @@ items.Scroll_Lesser_Revelation.description = Right-click to read. Conjures a gre
 npcRoles.Greater_Revelation.name = Greater Revelation
 items.Scroll_Greater_Revelation.name = Scroll of Greater Revelation
 items.Scroll_Greater_Revelation.description = Right-click to read. Conjures a blue flame that follows you and lights a wide area for a long time.
+npcRoles.Bubble_Flame.name = Bubble Flame
+items.Scroll_Bubble_Flame.name = Scroll of Bubble Flame
+items.Scroll_Bubble_Flame.description = Right-click to read. Conjures a flame in a bubble that follows you, even under water.

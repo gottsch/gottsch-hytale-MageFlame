@@ -15,8 +15,8 @@
     }
   },
   "Light": {
-    "Color": "#48f",
-    "Radius": 10
+    "Color": "#8cf",
+    "Radius": 12
   },
   "Particles": [
     {

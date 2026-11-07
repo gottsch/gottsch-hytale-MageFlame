@@ -66,10 +66,11 @@ public class MageFlameConfig {
     // default lifespan in seconds for every flame type not listed in lifespanSecondsByType (10 minutes, the Minecraft versions' 12000 ticks)
     private int mageFlameLifespanSeconds = 600;
     // lifespan in seconds per flame type; 0 or less means that type never expires. Defaults follow the Minecraft versions
-    // (12000/18000/36000 ticks = 10/15/30 minutes): Mage_Flame uses the default above, the others are listed here.
+    // (12000/18000/36000 ticks = 10/15/30 minutes; Bubble Flame 20 minutes): Mage_Flame uses the default above, the others are listed here.
     private Map<String, Integer> lifespanSecondsByType = new HashMap<>(Map.of(
             "Lesser_Revelation", 900,
-            "Greater_Revelation", 1800));
+            "Greater_Revelation", 1800,
+            "Bubble_Flame", 1200));
     // remove a player's flames when that player dies (false: the flames stay with them through respawn)
     private boolean despawnOnOwnerDeath = false;
     // flames are removed when their owner logs out or the server stops; true brings them back (with the time they had left)

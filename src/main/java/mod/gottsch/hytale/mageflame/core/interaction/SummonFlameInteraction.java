@@ -26,6 +26,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
+import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -36,7 +37,8 @@ import mod.gottsch.hytale.mageflame.core.summon.FlameSummoner;
 /**
  * Item interaction {@code MageFlameSummon}: conjures a flame for the player using the item. The item's JSON picks the flame with
  * {@code "FlameType"} (the part of the slot role ids before {@code _Slot<N>}, default {@code Mage_Flame}), so a new flame type
- * and its scroll need only JSON. The JSON runs this and then a vanilla {@code ModifyInventory} step to use up one scroll:
+ * and its scroll need only JSON. This interaction also uses up one scroll, but only when the summon succeeded (a JSON {@code ModifyInventory} step would use it up
+ * even if the summon failed afterwards):
  * <pre>
  * { "Type": "MageFlameSummon", "FlameType": "Mage_Flame" }
  * </pre>
@@ -80,8 +82,15 @@ public class SummonFlameInteraction extends SimpleInstantInteraction {
         Store<EntityStore> store = commandBuffer.getStore();
         World world = store.getExternalData().getWorld();
         final String flame = flameType;
+        // the scroll to use up: where it sits now (the world thread runs this a moment later)
+        final ItemContainer heldContainer = context.getHeldItemContainer();
+        final short heldSlot = context.getHeldItemSlot();
         world.execute(() -> {
             FlameSummoner.Result result = FlameSummoner.summon(store, ref, playerRef, world, flame);
+            // use up one scroll only if the flame appeared, so a failed summon costs nothing
+            if (result.success() && heldContainer != null) {
+                heldContainer.removeItemStackFromSlot(heldSlot, 1);
+            }
             playerRef.sendMessage(Message.raw(result.message()));
         });
     }
