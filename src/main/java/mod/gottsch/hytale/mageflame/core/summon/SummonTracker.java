@@ -25,15 +25,20 @@ import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import org.joml.Vector3d;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 import java.util.regex.Pattern;
 
@@ -47,7 +52,8 @@ import java.util.regex.Pattern;
  * removes flames that have lived longer than {@code MageFlameLifespanSeconds}. The same spawn time lets a HUD show how long
  * each flame has left ({@link #remainingSeconds(Flame, int)}).
  * <p>
- * Entries are in memory only: after a server restart, flames that survive in the world are no longer tracked.
+ * Entries are in memory only: after a server restart, flames that survive in the world are no longer tracked, so
+ * {@link #sweepOrphans(World)} removes them.
  *
  * @author Mark Gottschling on 11/06/2026
  */
@@ -108,19 +114,21 @@ public final class SummonTracker {
         return flames;
     }
 
-    /**
-     * Points a player's surviving flames at their new connection. A flame remembers its owner's PlayerRef, which is a different
-     * object after a relog, so without this the stuck watchdog would skip it. Returns true if the player has any flames.
-     */
-    public static boolean rebindOwner(UUID player, PlayerRef newOwner) {
-        List<Flame> flames = flamesOf(player);
-        for (int i = 0; i < flames.size(); i++) {
-            Flame f = flames.get(i);
-            if (f.owner() != newOwner) {
-                flames.set(i, new Flame(f.slot(), f.type(), f.ref(), f.world(), f.spawnedAtMillis(), newOwner, f.watch()));
-            }
+    /** Stops tracking all of the player's flames and returns them (the entities are left for the caller to remove). */
+    public static List<Flame> takeAll(UUID player) {
+        List<Flame> flames = FLAMES.remove(player);
+        if (flames == null) {
+            return List.of();
         }
-        return !flames.isEmpty();
+        flames.removeIf(flame -> !flame.ref().isValid());
+        return flames;
+    }
+
+    /** A copy of every tracked player's flames. */
+    public static Map<UUID, List<Flame>> allFlames() {
+        Map<UUID, List<Flame>> copy = new java.util.HashMap<>();
+        FLAMES.forEach((id, flames) -> copy.put(id, List.copyOf(flames)));
+        return copy;
     }
 
     /** The lowest slot number (1-based) that none of the given flames holds, or -1 if every slot is taken. */
@@ -184,6 +192,52 @@ public final class SummonTracker {
                         // the world is gone (crashed or shut down): its flames are gone with it
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Removes flame entities in this world that the tracker does not know. They are leftovers: a server restart saves the flames
+     * in the world but forgets who owns them, and a hot reload of a flame's asset re-creates the entity under a new reference.
+     * Untracked, they would escape the summon limit, the HUD and the lifespan for good. Must run on the world's thread.
+     *
+     * @return how many were removed
+     */
+    public static int sweepOrphans(World world) {
+        Store<EntityStore> store = world.getEntityStore().getStore();
+        Set<Integer> known = new HashSet<>();
+        for (List<Flame> flames : FLAMES.values()) {
+            for (Flame flame : flames) {
+                if (flame.world() == world && flame.ref().isValid()) {
+                    known.add(flame.ref().getIndex());
+                }
+            }
+        }
+        AtomicInteger removed = new AtomicInteger();
+        store.forEachChunk(NPCEntity.getComponentType(), (chunk, commandBuffer) -> {
+            for (int i = 0; i < chunk.size(); i++) {
+                NPCEntity npc = chunk.getComponent(i, NPCEntity.getComponentType());
+                if (npc != null && isFlameRole(npc.getRoleName()) && !known.contains(chunk.getReferenceTo(i).getIndex())) {
+                    commandBuffer.removeEntity(chunk.getReferenceTo(i), RemoveReason.REMOVE);
+                    removed.incrementAndGet();
+                }
+            }
+        });
+        if (removed.get() > 0) {
+            LOGGER.atInfo().log("Removed %d untracked Mage Flame(s) left over from before a restart or reload", removed.get());
+        }
+        return removed.get();
+    }
+
+    /** {@link #sweepOrphans(World)} in every loaded world, each on its own thread. Safe to call from any thread. */
+    public static void sweepAllWorlds() {
+        for (World world : Universe.get().getWorlds().values()) {
+            try {
+                if (world.isAlive()) {
+                    world.execute(() -> sweepOrphans(world));
+                }
+            } catch (IllegalThreadStateException e) {
+                // the world is shutting down
             }
         }
     }

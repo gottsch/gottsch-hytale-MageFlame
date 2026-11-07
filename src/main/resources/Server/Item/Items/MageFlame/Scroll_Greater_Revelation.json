@@ -36,11 +36,7 @@
         "Quantity": 1
       },
       {
-        "ItemId": "Ingredient_Water_Essence",
-        "Quantity": 1
-      },
-      {
-        "ItemId": "Ingredient_Bar_Thorium",
+        "ItemId": "Ingredient_Void_Essence",
         "Quantity": 1
       }
     ],

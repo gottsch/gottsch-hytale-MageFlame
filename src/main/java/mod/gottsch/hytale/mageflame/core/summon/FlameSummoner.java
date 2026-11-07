@@ -57,6 +57,17 @@ public final class FlameSummoner {
 
     public static Result summon(Store<EntityStore> store, Ref<EntityStore> playerEntity, PlayerRef playerRef, World world,
                                 String flameType) {
+        return summon(store, playerEntity, playerRef, world, flameType, System.currentTimeMillis());
+    }
+
+    /** Conjures a flame that has already burned for a while: {@code spawnedAtMillis} is when it counts as having been summoned. */
+    public static Result restore(Store<EntityStore> store, Ref<EntityStore> playerEntity, PlayerRef playerRef, World world,
+                                 String flameType, long spawnedAtMillis) {
+        return summon(store, playerEntity, playerRef, world, flameType, spawnedAtMillis);
+    }
+
+    private static Result summon(Store<EntityStore> store, Ref<EntityStore> playerEntity, PlayerRef playerRef, World world,
+                                 String flameType, long spawnedAtMillis) {
         TransformComponent transform = store.getComponent(playerEntity, TransformComponent.getComponentType());
         if (transform == null) {
             return new Result(false, "Could not find your position.");
@@ -88,7 +99,7 @@ public final class FlameSummoner {
         if (spawned == null) {
             return new Result(false, "Could not spawn " + role + " (is the role loaded?).");
         }
-        mine.add(new SummonTracker.Flame(slot, flameType, spawned.left(), world, System.currentTimeMillis(), playerRef,
+        mine.add(new SummonTracker.Flame(slot, flameType, spawned.left(), world, spawnedAtMillis, playerRef,
                 new SummonTracker.Watch()));
         FlameHudManager.track(playerRef, world);   // the lifespan HUD appears within a second
         return new Result(true, replaced ? "Your flame is renewed." : "A flame appears.");

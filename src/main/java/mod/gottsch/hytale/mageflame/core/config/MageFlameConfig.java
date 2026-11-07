@@ -49,6 +49,10 @@ public class MageFlameConfig {
                     (config, value, extraInfo) -> config.despawnOnOwnerDeath = value,
                     (config, extraInfo) -> config.despawnOnOwnerDeath)
             .add()
+            .append(new KeyedCodec<>("PersistFlames", Codec.BOOLEAN),
+                    (config, value, extraInfo) -> config.persistFlames = value,
+                    (config, extraInfo) -> config.persistFlames)
+            .add()
             .append(new KeyedCodec<>("LifespanSecondsByType", new MapCodec<>(Codec.INTEGER, HashMap::new)),
                     (config, value, extraInfo) -> config.lifespanSecondsByType = value,
                     (config, extraInfo) -> config.lifespanSecondsByType)
@@ -68,8 +72,15 @@ public class MageFlameConfig {
             "Greater_Revelation", 1800));
     // remove a player's flames when that player dies (false: the flames stay with them through respawn)
     private boolean despawnOnOwnerDeath = false;
+    // flames are removed when their owner logs out or the server stops; true brings them back (with the time they had left)
+    // when the owner returns, false lets them go
+    private boolean persistFlames = true;
 
     private MageFlameConfig() {
+    }
+
+    public boolean isPersistFlames() {
+        return persistFlames;
     }
 
     public boolean isDespawnOnOwnerDeath() {

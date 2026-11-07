@@ -3,6 +3,7 @@
   "MaxSummonedEntitiesPerPlayer": 3,
   "MageFlameLifespanSeconds": 600,
   "DespawnOnOwnerDeath": false,
+  "PersistFlames": true,
   "LifespanSecondsByType": {
     "Lesser_Revelation": 900,
     "Greater_Revelation": 1800
