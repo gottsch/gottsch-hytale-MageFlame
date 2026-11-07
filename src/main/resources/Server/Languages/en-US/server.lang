@@ -1,3 +1,9 @@
 npcRoles.Mage_Flame.name = Mage Flame
 items.Scroll_Mage_Flame.name = Scroll of Mage Flame
 items.Scroll_Mage_Flame.description = Right-click to read. Conjures a floating flame that follows you and lights your way.
+npcRoles.Lesser_Revelation.name = Lesser Revelation
+items.Scroll_Lesser_Revelation.name = Scroll of Lesser Revelation
+items.Scroll_Lesser_Revelation.description = Right-click to read. Conjures a green flame that follows you and lights your way a little farther than a torch.
+npcRoles.Greater_Revelation.name = Greater Revelation
+items.Scroll_Greater_Revelation.name = Scroll of Greater Revelation
+items.Scroll_Greater_Revelation.description = Right-click to read. Conjures a blue flame that follows you and lights a wide area for a long time.

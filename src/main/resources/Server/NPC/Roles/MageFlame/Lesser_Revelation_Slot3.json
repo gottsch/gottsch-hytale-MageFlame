@@ -1,0 +1,18 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Lesser_Revelation",
+  "Modify": {
+    "FollowStopDistance": 6,
+    "FollowSlowDownDistance": 8,
+    "IndoorFollowOffset": [
+      0,
+      1.4,
+      0
+    ],
+    "OutdoorFollowOffset": [
+      0,
+      2.4,
+      0
+    ]
+  }
+}

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.ToIntFunction;
 import java.util.regex.Pattern;
 
 /**
@@ -53,6 +54,9 @@ import java.util.regex.Pattern;
 public final class SummonTracker {
     /** Number of slots. Every flame type must provide this many slot roles: {@code <Type>_Slot1} .. {@code <Type>_Slot<N>}. */
     public static final int SLOT_COUNT = 4;
+
+    /** Returned by {@link #remainingSeconds} for a flame type that never expires. */
+    public static final int NO_EXPIRY = -1;
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
@@ -104,6 +108,21 @@ public final class SummonTracker {
         return flames;
     }
 
+    /**
+     * Points a player's surviving flames at their new connection. A flame remembers its owner's PlayerRef, which is a different
+     * object after a relog, so without this the stuck watchdog would skip it. Returns true if the player has any flames.
+     */
+    public static boolean rebindOwner(UUID player, PlayerRef newOwner) {
+        List<Flame> flames = flamesOf(player);
+        for (int i = 0; i < flames.size(); i++) {
+            Flame f = flames.get(i);
+            if (f.owner() != newOwner) {
+                flames.set(i, new Flame(f.slot(), f.type(), f.ref(), f.world(), f.spawnedAtMillis(), newOwner, f.watch()));
+            }
+        }
+        return !flames.isEmpty();
+    }
+
     /** The lowest slot number (1-based) that none of the given flames holds, or -1 if every slot is taken. */
     public static int freeSlot(List<Flame> flames) {
         for (int slot = 1; slot <= SLOT_COUNT; slot++) {
@@ -128,29 +147,42 @@ public final class SummonTracker {
         return roleName != null && SLOT_ROLE.matcher(roleName).matches();
     }
 
-    /** Whole seconds a flame has left, never below zero. */
+    /**
+     * Whole seconds a flame has left, never below zero. {@code lifespanSeconds} of 0 or less means the flame never expires, and
+     * the result is then {@link #NO_EXPIRY}.
+     */
     public static int remainingSeconds(Flame flame, int lifespanSeconds) {
+        if (lifespanSeconds <= 0) {
+            return NO_EXPIRY;
+        }
         long elapsedMillis = System.currentTimeMillis() - flame.spawnedAtMillis();
         long remainingMillis = lifespanSeconds * 1000L - elapsedMillis;
         return (int) Math.max(0, (remainingMillis + 999) / 1000);
     }
 
     /**
-     * Removes every tracked flame that has outlived the lifespan. Safe to call from any thread: the removal itself is
+     * Removes every tracked flame that has outlived ITS type's lifespan. Safe to call from any thread: the removal itself is
      * handed to the flame's world so it runs on the world thread.
+     *
+     * @param lifespanOf lifespan in seconds for a flame type; 0 or less means that type never expires
      */
-    public static void expire(int lifespanSeconds) {
+    public static void expire(ToIntFunction<String> lifespanOf) {
         for (List<Flame> flames : FLAMES.values()) {
             for (Flame flame : flames) {
+                int remaining = remainingSeconds(flame, lifespanOf.applyAsInt(flame.type()));
                 if (!flame.ref().isValid()) {
                     flames.remove(flame);
-                } else if (remainingSeconds(flame, lifespanSeconds) <= 0) {
+                } else if (remaining != NO_EXPIRY && remaining <= 0) {
                     flames.remove(flame);
-                    flame.world().execute(() -> {
-                        if (flame.ref().isValid()) {
-                            flame.ref().getStore().removeEntity(flame.ref(), RemoveReason.REMOVE);
-                        }
-                    });
+                    try {
+                        flame.world().execute(() -> {
+                            if (flame.ref().isValid()) {
+                                flame.ref().getStore().removeEntity(flame.ref(), RemoveReason.REMOVE);
+                            }
+                        });
+                    } catch (IllegalThreadStateException e) {
+                        // the world is gone (crashed or shut down): its flames are gone with it
+                    }
                 }
             }
         }
@@ -164,7 +196,12 @@ public final class SummonTracker {
     public static void watchdog() {
         for (List<Flame> flames : FLAMES.values()) {
             for (Flame flame : flames) {
-                flame.world().execute(() -> checkStuck(flame));
+                try {
+                    flame.world().execute(() -> checkStuck(flame));
+                } catch (IllegalThreadStateException e) {
+                    // the world is gone (crashed or shut down): forget its flames instead of failing every second
+                    flames.remove(flame);
+                }
             }
         }
     }

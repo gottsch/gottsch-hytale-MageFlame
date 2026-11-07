@@ -20,6 +20,10 @@ package mod.gottsch.hytale.mageflame.core.config;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.codec.codecs.map.MapCodec;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Server configuration for Mage Flame, saved as MageFlame.json in the plugin's data folder.
@@ -45,14 +49,23 @@ public class MageFlameConfig {
                     (config, value, extraInfo) -> config.despawnOnOwnerDeath = value,
                     (config, extraInfo) -> config.despawnOnOwnerDeath)
             .add()
+            .append(new KeyedCodec<>("LifespanSecondsByType", new MapCodec<>(Codec.INTEGER, HashMap::new)),
+                    (config, value, extraInfo) -> config.lifespanSecondsByType = value,
+                    (config, extraInfo) -> config.lifespanSecondsByType)
+            .add()
             .build();
 
     // show the remaining lifespan of summoned light sources on the HUD
     private boolean enableLifespanDisplay = true;
     // max number of concurrent summoned entities per player
     private int maxSummonedEntitiesPerPlayer = 1;
-    // lifespan of a Mage Flame in seconds (10 minutes, same as the Minecraft versions' 12000 ticks)
+    // default lifespan in seconds for every flame type not listed in lifespanSecondsByType (10 minutes, the Minecraft versions' 12000 ticks)
     private int mageFlameLifespanSeconds = 600;
+    // lifespan in seconds per flame type; 0 or less means that type never expires. Defaults follow the Minecraft versions
+    // (12000/18000/36000 ticks = 10/15/30 minutes): Mage_Flame uses the default above, the others are listed here.
+    private Map<String, Integer> lifespanSecondsByType = new HashMap<>(Map.of(
+            "Lesser_Revelation", 900,
+            "Greater_Revelation", 1800));
     // remove a player's flames when that player dies (false: the flames stay with them through respawn)
     private boolean despawnOnOwnerDeath = false;
 
@@ -73,5 +86,14 @@ public class MageFlameConfig {
 
     public int getMageFlameLifespanSeconds() {
         return mageFlameLifespanSeconds;
+    }
+
+    /**
+     * Lifespan in seconds of a flame type: its entry in {@code LifespanSecondsByType}, else the default
+     * {@code MageFlameLifespanSeconds}. 0 or less means the flame never expires.
+     */
+    public int lifespanFor(String flameType) {
+        Integer own = lifespanSecondsByType == null ? null : lifespanSecondsByType.get(flameType);
+        return own != null ? own : mageFlameLifespanSeconds;
     }
 }

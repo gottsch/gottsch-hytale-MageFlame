@@ -110,6 +110,27 @@
           ]
         },
         {
+          "$Comment": "Extinguished by water: a fire flame cannot go under. Hiss + a puff of smoke (detached, so it stays after the flame is gone), then a normal Despawn. DO NOT use \"Force\": true here: Force removes the entity at once and the game's own NPC tick then removes it again, which throws 'Invalid entity reference!' and crashes the whole world (seen 2026-11-07, players are kicked). No \"Continue\": the rest of this tick's instructions must not run on a flame that is despawning. A flame type that SHOULD work underwater (e.g. a Bubble Flame) leaves this instruction out.",
+          "Sensor": {
+            "Type": "InWater"
+          },
+          "Actions": [
+            {
+              "Type": "PlaySound",
+              "SoundEventId": "SFX_Torch_Off"
+            },
+            {
+              "Type": "SpawnParticles",
+              "ParticleSystem": "Smoke_Black",
+              "Scale": 0.6,
+              "IsDetachedFromModel": true
+            },
+            {
+              "Type": "Despawn"
+            }
+          ]
+        },
+        {
           "Sensor": {
             "Type": "State",
             "State": "Idle"

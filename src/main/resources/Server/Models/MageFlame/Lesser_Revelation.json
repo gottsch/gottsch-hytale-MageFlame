@@ -1,0 +1,30 @@
+{
+  "Model": "Characters/Empty_Cube.blockymodel",
+  "Texture": "Characters/Empty_Cube_Texture.png",
+  "EyeHeight": 0.2,
+  "HitBox": {
+    "Max": {
+      "X": 0.25,
+      "Y": 0.3,
+      "Z": 0.25
+    },
+    "Min": {
+      "X": -0.25,
+      "Y": 0,
+      "Z": -0.25
+    }
+  },
+  "Light": {
+    "Color": "#2b3",
+    "Radius": 8
+  },
+  "Particles": [
+    {
+      "SystemId": "Fire_Green",
+      "PositionOffset": {
+        "Y": 0.1
+      },
+      "Scale": 0.65
+    }
+  ]
+}

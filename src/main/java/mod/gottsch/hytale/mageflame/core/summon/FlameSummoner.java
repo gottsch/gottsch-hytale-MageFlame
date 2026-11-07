@@ -27,6 +27,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import mod.gottsch.hytale.mageflame.MageFlame;
+import mod.gottsch.hytale.mageflame.core.hud.FlameHudManager;
 import org.joml.Vector3d;
 
 import java.util.List;
@@ -49,6 +50,8 @@ public final class FlameSummoner {
     public record Result(boolean success, String message) {
     }
 
+    private static final com.hypixel.hytale.logger.HytaleLogger LOGGER = com.hypixel.hytale.logger.HytaleLogger.forEnclosingClass();
+
     private FlameSummoner() {
     }
 
@@ -66,6 +69,7 @@ public final class FlameSummoner {
         int max = Math.clamp(MageFlame.getConfig().get().getMaxSummonedEntitiesPerPlayer(), 1, SummonTracker.SLOT_COUNT);
         List<SummonTracker.Flame> mine = SummonTracker.flamesOf(playerRef.getUuid());
         boolean replaced = false;
+        LOGGER.atInfo().log("Summon %s for %s: %d tracked flame(s), limit %d", flameType, playerRef.getUsername(), mine.size(), max);
         while (mine.size() >= max) {
             SummonTracker.Flame oldest = mine.remove(0);
             if (oldest.ref().isValid()) {
@@ -86,6 +90,7 @@ public final class FlameSummoner {
         }
         mine.add(new SummonTracker.Flame(slot, flameType, spawned.left(), world, System.currentTimeMillis(), playerRef,
                 new SummonTracker.Watch()));
+        FlameHudManager.track(playerRef, world);   // the lifespan HUD appears within a second
         return new Result(true, replaced ? "Your flame is renewed." : "A flame appears.");
     }
 }
