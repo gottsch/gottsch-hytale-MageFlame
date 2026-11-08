@@ -1,7 +1,7 @@
 {
     "Group": "gottsch",
     "Name": "MageFlame",
-    "Version": "0.1.0",
+    "Version": "1.0.0",
     "Description": "Hands-free light sources that follow you wherever you go, summoned with scrolls. No mana, no classes, no levels.",
     "Authors": [
         {

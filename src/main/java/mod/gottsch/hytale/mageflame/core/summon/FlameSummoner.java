@@ -83,9 +83,7 @@ public final class FlameSummoner {
         LOGGER.atInfo().log("Summon %s for %s: %d tracked flame(s), limit %d", flameType, playerRef.getUsername(), mine.size(), max);
         while (mine.size() >= max) {
             SummonTracker.Flame oldest = mine.remove(0);
-            if (oldest.ref().isValid()) {
-                store.removeEntity(oldest.ref(), RemoveReason.REMOVE);
-            }
+            SummonTracker.removeFromItsWorld(oldest);   // it may live in another world (after a world change)
             replaced = true;
         }
 

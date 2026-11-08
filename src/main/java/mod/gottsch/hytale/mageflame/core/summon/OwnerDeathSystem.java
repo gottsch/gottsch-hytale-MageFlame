@@ -19,7 +19,6 @@ package mod.gottsch.hytale.mageflame.core.summon;
 
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
@@ -60,7 +59,7 @@ public class OwnerDeathSystem extends DeathSystems.OnDeathSystem {
         }
         List<SummonTracker.Flame> mine = SummonTracker.flamesOf(player.getUuid());
         for (SummonTracker.Flame flame : new ArrayList<>(mine)) {
-            commandBuffer.removeEntity(flame.ref(), RemoveReason.REMOVE);
+            SummonTracker.removeFromItsWorld(flame);   // not this commandBuffer: the flame may be in another world
         }
         mine.clear();
     }

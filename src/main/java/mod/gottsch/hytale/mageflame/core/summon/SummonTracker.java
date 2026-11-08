@@ -169,6 +169,22 @@ public final class SummonTracker {
     }
 
     /**
+     * Removes a flame through the world it lives in (a flame left behind in another world after a world change cannot be removed through
+     * the current world's store). Safe from any thread; does nothing if that world is gone.
+     */
+    public static void removeFromItsWorld(Flame flame) {
+        try {
+            flame.world().execute(() -> {
+                if (flame.ref().isValid()) {
+                    flame.ref().getStore().removeEntity(flame.ref(), RemoveReason.REMOVE);
+                }
+            });
+        } catch (IllegalThreadStateException e) {
+            // the world is gone (crashed or shut down): its flames are gone with it
+        }
+    }
+
+    /**
      * Removes every tracked flame that has outlived ITS type's lifespan. Safe to call from any thread: the removal itself is
      * handed to the flame's world so it runs on the world thread.
      *
