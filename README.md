@@ -19,6 +19,12 @@ Right-click a scroll to read it. A flame appears and follows you. The scroll is 
 
 Scrolls can also be found in chests: cheaper ones in the first zones, Greater Revelations deeper in.
 
+## Screenshots
+
+<p align="center"><img src="https://raw.githubusercontent.com/wiki/gottsch/gottsch-hytale-MageFlame/images/flames.png" alt="Greater Revelation, Mage Flame and Bubble Flame following the player, with the lifespan panel" width="720"></p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/wiki/gottsch/gottsch-hytale-MageFlame/images/lesser-revelation.png" alt="A Lesser Revelation flame lighting a dark, rainy field" width="720"></p>
+
 ## Features
 
 - Hands-free light that keeps up with you, hovers higher in the open and lower in tunnels, and catches up if you outrun it or turn a corner underground.
