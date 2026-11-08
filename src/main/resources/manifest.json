@@ -8,7 +8,7 @@
             "Name": "gottsch"
         }
     ],
-    "Website": "https://github.com/gottsch",
+    "Website": "https://www.curseforge.com/hytale/mods/mage-flame",
     "DisabledByDefault": false,
     "IncludesAssetPack": true,
     "Dependencies": {
@@ -20,6 +20,6 @@
     "ServerVersion": ">=0.7.4 <0.8.0",
     "Main": "mod.gottsch.hytale.mageflame.MageFlame",
     "UpdateChecker": {
-        "CurseForge": ""
+        "CurseForge": "1787930"
     }
 }

@@ -20,7 +20,6 @@ package mod.gottsch.hytale.mageflame.core.command;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.ColorLight;
-import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.DefaultArg;
@@ -46,7 +45,7 @@ public class LightTestCommand extends AbstractPlayerCommand {
 
     public LightTestCommand() {
         super("light", "Prototype: toggle a dynamic light on yourself.");
-        this.setPermissionGroup(GameMode.Adventure);
+        // no permission group: needs the generated permission node (operators), so players cannot use it to bypass the scrolls
         this.radiusArg = withDefaultArg("radius", "Light radius (0-127)", ArgTypes.INTEGER, 8, "8");
         this.colorArg = withDefaultArg("color", "Colour as 3 hex digits, one per channel (0-F)", ArgTypes.STRING, "fd9", "fd9");
     }

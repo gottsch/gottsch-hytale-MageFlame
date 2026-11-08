@@ -19,7 +19,6 @@ package mod.gottsch.hytale.mageflame.core.command;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.DefaultArg;
@@ -43,7 +42,7 @@ public class SummonCommand extends AbstractPlayerCommand {
 
     public SummonCommand() {
         super("summon", "Conjure a flame that follows you (what the scroll does).");
-        this.setPermissionGroup(GameMode.Adventure);
+        // no permission group: needs the generated permission node (operators), so players cannot use it to bypass the scrolls
         this.typeArg = withDefaultArg("type", "Flame type: the part of its slot role ids before _Slot<N>",
                 ArgTypes.STRING, FlameSummoner.DEFAULT_FLAME_TYPE, FlameSummoner.DEFAULT_FLAME_TYPE);
     }

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - Unreleased
+## [1.0.0] - 2026-11-08
 
 First version: hands-free light sources that follow you, summoned with scrolls. Targets Hytale server 0.7.4.
 
@@ -18,13 +18,14 @@ First version: hands-free light sources that follow you, summoned with scrolls. 
   - **Bubble Flame** (warm light inside a translucent bubble, 20 minutes). Mage Flame scroll + 3 Cyan Crystal at the Workbench. Follows you under water.
 - The flames fly beside you, keep up while you run, hover higher in the open and lower in tunnels, and teleport to you if you outrun them or turn a corner underground.
 - Mage Flame, Lesser Revelation and Greater Revelation are put out by water (with a hiss and a puff of smoke). Bubble Flame is not.
-- A lifespan display (top-left) listing each flame and its time left. Can be turned off.
+- A lifespan display (top-left) listing each flame, the time it has left and a progress bar showing how much of its life remains. Can be turned off.
 - A per-player limit on flames (default 1); summoning past it replaces the oldest flame.
 - Flames are saved when you leave or the server stops, and come back with their remaining time when you join. Time does not run while you are away.
 - Scrolls can be found in chests in the world (shared encounter loot, zones 1 to 3): cheaper scrolls early on, Greater Revelation deeper in.
 - Configuration file `MageFlame.json`: `EnableLifespanDisplay`, `MaxSummonedEntitiesPerPlayer`, `MageFlameLifespanSeconds` (default lifespan), `LifespanSecondsByType`
   (per-flame lifespan; 0 or less means never expires), `DespawnOnOwnerDeath`, `PersistFlames`.
-- Commands under `/mageflame`: `summon [--type=...]`, `dispel` (remove all flames in the world), `status`, `healthcheck`, `light` (light test prototype).
+- Commands under `/mageflame`: `healthcheck` (everyone), and for operators only (they need the command's permission): `summon [--type=...]` (a flame without a scroll),
+  `dispel` (remove all flames in the world), `status` (debug) and `light` (light test prototype).
 
 ### Notes
 

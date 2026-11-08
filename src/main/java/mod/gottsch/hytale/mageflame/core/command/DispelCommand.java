@@ -20,7 +20,6 @@ package mod.gottsch.hytale.mageflame.core.command;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
@@ -43,7 +42,7 @@ public class DispelCommand extends AbstractPlayerCommand {
 
     public DispelCommand() {
         super("dispel", "Dispel every Mage Flame in this world.");
-        this.setPermissionGroup(GameMode.Adventure);
+        // no permission group: needs the generated permission node (operators), so players cannot use it to bypass the scrolls
     }
 
     @Override

@@ -19,7 +19,6 @@ package mod.gottsch.hytale.mageflame.core.command;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
@@ -46,7 +45,7 @@ public class StatusCommand extends AbstractPlayerCommand {
 
     public StatusCommand() {
         super("status", "Debug: list Mage Flames with their distance and flock membership.");
-        this.setPermissionGroup(GameMode.Adventure);
+        // no permission group: needs the generated permission node (operators), so players cannot use it to bypass the scrolls
     }
 
     @Override
