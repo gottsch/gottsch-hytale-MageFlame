@@ -26,8 +26,9 @@ import java.util.List;
 import java.util.function.ToIntFunction;
 
 /**
- * The lifespan HUD: one row per conjured flame showing its name and the time it has left, for example {@code Mage Flame  9:42}.
+ * The lifespan HUD: one row per conjured flame showing its name, the time it has left (for example {@code Mage Flame  9:42}) and a progress bar.
  * <p>
+ * Each row has a progress bar under it showing the share of the lifespan left (the game's own {@code ProgressBar} element).
  * The layout is inline markup built in Java (the same way vanilla's {@code SpectatingHud} does it), so it needs no layout file
  * and no asset restart. It is built once with a hidden row for every slot; {@link #refresh} then shows, hides and re-texts rows.
  * Place and size it with {@link #ANCHOR}.
@@ -57,20 +58,35 @@ public class FlameHud extends CustomUIHud {
             markup.append("""
                       Group #FlameRow%1$d {
                         Visible: false;
-                        LayoutMode: Left;
-                        Anchor: (Bottom: 6, Height: 28);
+                        LayoutMode: Top;
+                        Anchor: (Bottom: 6, Height: 46);
                         Background: #000000(0.35);
-                        Padding: (Horizontal: 10);
+                        Padding: (Horizontal: 10, Vertical: 5);
 
-                        Label #FlameName%1$d {
-                          Anchor: (Width: 140);
-                          Text: "";
-                          Style: (FontSize: 15, TextColor: #ffb347, VerticalAlignment: Center);
+                        Group {
+                          LayoutMode: Left;
+                          Anchor: (Height: 24);
+
+                          Label #FlameName%1$d {
+                            Anchor: (Width: 140);
+                            Text: "";
+                            Style: (FontSize: 15, TextColor: #ffb347, VerticalAlignment: Center);
+                          }
+
+                          Label #FlameTime%1$d {
+                            Text: "";
+                            Style: (FontSize: 17, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center);
+                          }
                         }
 
-                        Label #FlameTime%1$d {
-                          Text: "";
-                          Style: (FontSize: 17, TextColor: #ffffff, RenderBold: true, VerticalAlignment: Center);
+                        Group {
+                          Anchor: (Top: 3, Height: 8);
+                          Background: #1b1b24(0.9);
+
+                          ProgressBar #FlameBar%1$d {
+                            Value: 1.0;
+                            BarTexturePath: "Common/ProgressBarFill.png";
+                          }
                         }
                       }
                     """.formatted(i));
@@ -98,9 +114,13 @@ public class FlameHud extends CustomUIHud {
                 String name = flame.type().replace('_', ' ');
                 int remaining = SummonTracker.remainingSeconds(flame, lifespanOf.applyAsInt(flame.type()));
                 String time = remaining == SummonTracker.NO_EXPIRY ? "--" : format(remaining);
+                // share of the lifespan still left; a flame that never expires keeps a full bar
+                int total = lifespanOf.applyAsInt(flame.type());
+                float share = remaining == SummonTracker.NO_EXPIRY || total <= 0 ? 1.0f : Math.clamp(remaining / (float) total, 0f, 1f);
                 builder.set("#FlameName" + i + ".Text", name);
                 builder.set("#FlameTime" + i + ".Text", time);
-                signature.append(i).append(name).append(time).append('|');
+                builder.set("#FlameBar" + i + ".Value", share);
+                signature.append(i).append(name).append(time).append(Math.round(share * 100)).append('|');
             } else {
                 signature.append(i).append("-|");
             }
